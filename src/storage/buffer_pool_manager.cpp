@@ -120,7 +120,7 @@ bool BufferPoolManager::unpin_page(PageId page_id, bool is_dirty) {
 
     frame_id_t frame_id = page_table_[page_id];
     Page* page = &pages_[frame_id];
-    if (page->pin_count_ < 1) {
+    if (page->pin_count_ == 0) {
         return false;
     }
     page->pin_count_--;
@@ -174,17 +174,6 @@ Page* BufferPoolManager::new_page(PageId* page_id) {
     // 5.   返回获得的page
     std::scoped_lock lock{latch_};
 
-    bool flag = true;
-    for (size_t i = 0; i < pool_size_; ++i) {
-        if (pages_[i].pin_count_ <= 0) {
-            flag = false;
-            break;
-        }
-    }
-    if (flag) {
-        return nullptr;
-    }
-
     frame_id_t frame_id;
     if (!find_victim_page(&frame_id)) {
         return nullptr;
@@ -216,7 +205,7 @@ bool BufferPoolManager::delete_page(PageId page_id) {
 
     frame_id_t frame_id = page_table_[page_id];
     Page* page = &pages_[frame_id];
-    if (page->pin_count_ > 0) {
+    if (page->pin_count_ != 0) {
         return false;
     }
     disk_manager_->deallocate_page(page_id.fd);
@@ -232,4 +221,15 @@ bool BufferPoolManager::delete_page(PageId page_id) {
  * @description: 将buffer_pool中的所有页写回到磁盘
  * @param {int} fd 文件句柄
  */
-void BufferPoolManager::flush_all_pages(int fd) {}
+void BufferPoolManager::flush_all_pages(int fd) {
+    std::scoped_lock lock{latch_};
+
+    for (size_t i = 0; i < pool_size_; i++) {
+        Page* page = &pages_[i];
+        PageId page_id = page->get_page_id();
+        if (page_id.fd == fd && page_id.page_no != INVALID_PAGE_ID) {
+            disk_manager_->write_page(page_id.fd, page_id.page_no, page->get_data(), PAGE_SIZE);
+            page->is_dirty_ = false;
+        }
+    }
+}
