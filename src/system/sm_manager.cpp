@@ -198,7 +198,38 @@ void SmManager::drop_table(const std::string& tab_name, Context* context) {
  * @param {Context*} context
  */
 void SmManager::create_index(const std::string& tab_name, const std::vector<std::string>& col_names, Context* context) {
-    
+    TabMeta& tab = db_.get_table(tab_name);
+    if (ix_manager_->exists(tab_name, col_names)) {
+        throw IndexExistsError(tab_name, col_names);
+    }
+    std::vector<ColMeta> cols;
+    for (auto& col_name : col_names) {
+        cols.push_back(*tab.get_col(col_name));
+    }
+    ix_manager_->create_index(tab_name, cols);
+    std::unique_ptr<IxIndexHandle> ih = ix_manager_->open_index(tab_name, cols);
+    int col_tot_len = 0;
+    for (ColMeta& col : cols) {
+        col_tot_len += col.len;
+    }
+    RmFileHandle* file_handle = fhs_.at(tab_name).get();
+    char key[col_tot_len];
+    for (RmScan scan(file_handle); !scan.is_end(); scan.next()) {
+        std::unique_ptr<RmRecord> record = file_handle->get_record(scan.rid(), context);
+        int offset = 0;
+        for (size_t i = 0; i < cols.size(); ++i) {
+            memcpy(key + offset, record.get()->data + cols[i].offset, cols[i].len);
+            offset += cols[i].len;
+        }
+        ih->insert_entry(key, scan.rid(), context->txn_);
+    }
+    tab.indexes.push_back(IndexMeta{tab_name, col_tot_len, (int)cols.size(), cols});
+    ihs_.emplace(ix_manager_->get_index_name(tab_name, col_names), std::move(ih));
+    // 关闭索引！！！
+    std::string index_name = ix_manager_->get_index_name(tab_name, cols);
+    ix_manager_->close_index(ihs_.at(index_name).get());
+
+    flush_meta();
 }
 
 /**
