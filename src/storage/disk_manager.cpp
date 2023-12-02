@@ -161,7 +161,8 @@ int DiskManager::open_file(const std::string &path) {
         throw FileNotFoundError(path);
     }
     if (path2fd_.count(path)) {
-        throw FileNotClosedError(path);
+        // throw FileNotClosedError(path);
+        return path2fd_[path];
     }
     int fd = open(path.c_str(), O_RDWR);
     if (fd == -1) {
