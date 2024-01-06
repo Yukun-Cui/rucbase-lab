@@ -1,4 +1,4 @@
 mkdir build
 cd build
 cmake ..
-make rucbase -j4
+make rmdb -j4
