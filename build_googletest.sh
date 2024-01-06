@@ -1,5 +1,5 @@
 cd deps/googletest
 mkdir build
 cd build
-cmake.. && make -j4
+cmake .. && make -j4
 sudo make install

@@ -1,5 +1,5 @@
 cd rucbase_client
 mkdir build
 cd build
-cmake
+cmake ..
 make -j4
