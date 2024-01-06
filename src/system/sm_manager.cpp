@@ -213,6 +213,11 @@ void SmManager::create_table(const std::string& tab_name, const std::vector<ColD
     // fhs_[tab_name] = rm_manager_->open_file(tab_name);
     fhs_.emplace(tab_name, rm_manager_->open_file(tab_name));
 
+    // 表级锁
+    if (context) {
+        context->lock_mgr_->lock_exclusive_on_table(context->txn_, fhs_[tab_name]->GetFd());
+    }
+
     flush_meta();
 }
 
@@ -225,6 +230,12 @@ void SmManager::drop_table(const std::string& tab_name, Context* context) {
     if (!db_.is_table(tab_name)) {
         throw TableNotFoundError(tab_name);
     }
+
+    // 表级锁
+    if (context) {
+        context->lock_mgr_->lock_exclusive_on_table(context->txn_, fhs_[tab_name]->GetFd());
+    }
+
     TabMeta &tab = db_.get_table(tab_name);
     rm_manager_->close_file(fhs_[tab_name].get());
     rm_manager_->destroy_file(tab_name);
@@ -243,6 +254,12 @@ void SmManager::drop_table(const std::string& tab_name, Context* context) {
  * @param {Context*} context
  */
 void SmManager::create_index(const std::string& tab_name, const std::vector<std::string>& col_names, Context* context) {
+
+    // 表级锁
+    if (context) {
+        context->lock_mgr_->lock_shared_on_table(context->txn_, fhs_[tab_name]->GetFd());
+    }
+
     TabMeta& tab = db_.get_table(tab_name);
     if (ix_manager_->exists(tab_name, col_names)) {
         throw IndexExistsError(tab_name, col_names);
@@ -281,6 +298,12 @@ void SmManager::create_index(const std::string& tab_name, const std::vector<std:
  * @param {Context*} context
  */
 void SmManager::drop_index(const std::string& tab_name, const std::vector<std::string>& col_names, Context* context) {
+    
+    // 表级锁
+    if (context) {
+        context->lock_mgr_->lock_shared_on_table(context->txn_, fhs_[tab_name]->GetFd());
+    }
+
     if (!ix_manager_->exists(tab_name, col_names)) {
         throw IndexNotFoundError(tab_name, col_names);
     }

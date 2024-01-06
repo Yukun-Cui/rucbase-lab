@@ -108,7 +108,6 @@ class NestedLoopJoinExecutor : public AbstractExecutor {
             rhs_type = cond.rhs_val.type;
             rhs = cond.rhs_val.raw->data;
         } else {
-            // rhs is a column
             auto rhs_col = get_col(rec_cols, cond.rhs_col);
             rhs_type = rhs_col->type;
             rhs = rrec->data + rhs_col->offset - left_->tupleLen();

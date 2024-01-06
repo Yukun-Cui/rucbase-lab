@@ -43,6 +43,11 @@ class SeqScanExecutor : public AbstractExecutor {
         context_ = context;
 
         fed_conds_ = conds_;
+
+        // 表级锁
+        if (context_) {
+            context_->lock_mgr_->lock_shared_on_table(context->txn_, fh_->GetFd());
+        }
     }
 
     bool is_end() const override { return scan_->is_end(); }
@@ -61,7 +66,9 @@ class SeqScanExecutor : public AbstractExecutor {
             rid_ = scan_->rid();
             try {
                 auto rec = fh_->get_record(rid_, context_);
-                if (eval_conds(cols_, fed_conds_, rec.get())) break;
+                if (eval_conds(cols_, fed_conds_, rec.get())) {
+                    break;
+                }
             } catch (RecordNotFoundError &e) {
                 std::cerr << e.what() << std::endl;
             }
@@ -77,7 +84,9 @@ class SeqScanExecutor : public AbstractExecutor {
         for (scan_->next(); !scan_->is_end(); scan_->next()) {
             rid_ = scan_->rid();
             auto rec = fh_->get_record(rid_, context_);
-            if (eval_conds(cols_, fed_conds_, rec.get())) break;
+            if (eval_conds(cols_, fed_conds_, rec.get())) {
+                break;
+            }
         }
     }
 

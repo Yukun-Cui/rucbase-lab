@@ -62,19 +62,113 @@ class IndexScanExecutor : public AbstractExecutor {
             }
         }
         fed_conds_ = conds_;
+
+        // 表级锁
+        if (context_) {
+            context_->lock_mgr_->lock_shared_on_table(context->txn_, fh_->GetFd());
+        }
     }
 
     void beginTuple() override {
-        
+        auto ih = sm_manager_->ihs_.at(sm_manager_->get_ix_manager()->get_index_name(tab_name_, index_col_names_)).get();
+        Iid lower = ih->leaf_begin();
+        Iid upper = ih->leaf_end();
+        for (auto &index_col : index_col_names_) {
+            for (auto &cond : fed_conds_) {
+                if (cond.is_rhs_val && cond.op != OP_NE && cond.lhs_col.col_name == index_col) {
+                    int offset = 0;
+                    char *key = new char[index_meta_.col_tot_len];
+                    for (size_t i = 0; i < index_meta_.col_num; ++i) {
+                        auto &cond = fed_conds_[i];
+                        auto &col = index_meta_.cols[i];
+                        memcpy(key + offset, cond.rhs_val.raw->data, col.len);
+                        offset += col.len;
+                    }
+                    if (cond.op == OP_EQ) {
+                        lower = ih->lower_bound(key);
+                        upper = ih->upper_bound(key);
+                    } else if (cond.op == OP_LT) {
+                        upper = ih->lower_bound(key);
+                    } else if (cond.op == OP_GT) {
+                        lower = ih->upper_bound(key);
+                    } else if (cond.op == OP_LE) {
+                        upper = ih->upper_bound(key);
+                    } else if (cond.op == OP_GE) {
+                        lower = ih->lower_bound(key);
+                    } else {
+                        throw InternalError("Unexpected op type");
+                    }
+                    break;
+                }
+            }
+        }
+        scan_ = std::make_unique<IxScan>(ih, lower, upper, sm_manager_->get_bpm());
+        while (!scan_->is_end()) {
+            rid_ = scan_->rid();
+            auto rec = fh_->get_record(rid_, context_);
+            if (eval_conds(cols_, fed_conds_, rec.get())) {
+                break;
+            }
+            scan_->next();
+        }
     }
 
     void nextTuple() override {
-        
+        assert(!is_end());
+        for (scan_->next(); !scan_->is_end(); scan_->next()) {
+            rid_ = scan_->rid();
+            auto rec = fh_->get_record(rid_, context_);
+            if (eval_conds(cols_, fed_conds_, rec.get())) break;
+        }
     }
 
+    bool is_end() const override { return scan_->is_end(); }
+
+    size_t tupleLen() const override { return len_; }
+
+    const std::vector<ColMeta> &cols() const override { return cols_; }
+
     std::unique_ptr<RmRecord> Next() override {
-        return nullptr;
+        assert(!is_end());
+        return fh_->get_record(rid_, context_);
     }
 
     Rid &rid() override { return rid_; }
+
+    bool eval_cond(const std::vector<ColMeta> &rec_cols, const Condition &cond, const RmRecord *rec) {
+        auto lhs_col = get_col(rec_cols, cond.lhs_col);
+        char *lhs = rec->data + lhs_col->offset;
+        char *rhs;
+        ColType rhs_type;
+        if (cond.is_rhs_val) {
+            rhs_type = cond.rhs_val.type;
+            rhs = cond.rhs_val.raw->data;
+        } else {
+            auto rhs_col = get_col(rec_cols, cond.rhs_col);
+            rhs_type = rhs_col->type;
+            rhs = rec->data + rhs_col->offset;
+        }
+        assert(rhs_type == lhs_col->type);
+        int cmp = ix_compare(lhs, rhs, rhs_type, lhs_col->len);
+        if (cond.op == OP_EQ) {
+            return cmp == 0;
+        } else if (cond.op == OP_NE) {
+            return cmp != 0;
+        } else if (cond.op == OP_LT) {
+            return cmp < 0;
+        } else if (cond.op == OP_GT) {
+            return cmp > 0;
+        } else if (cond.op == OP_LE) {
+            return cmp <= 0;
+        } else if (cond.op == OP_GE) {
+            return cmp >= 0;
+        } else {
+            throw InternalError("Unexpected op type");
+        }
+    }
+
+    bool eval_conds(const std::vector<ColMeta> &rec_cols, const std::vector<Condition> &conds, const RmRecord *rec) {
+        return std::all_of(conds.begin(), conds.end(),
+                           [&](const Condition &cond) { return eval_cond(rec_cols, cond, rec); });
+    }
 };

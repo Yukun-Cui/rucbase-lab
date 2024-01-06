@@ -27,7 +27,13 @@ Transaction * TransactionManager::begin(Transaction* txn, LogManager* log_manage
     // 3. 把开始事务加入到全局事务表中
     // 4. 返回当前事务指针
     
-    return nullptr;
+    std::scoped_lock lock(latch_);
+
+    if (txn == nullptr) {
+        txn = new Transaction(next_txn_id_++);
+    }
+    txn_map[txn->get_transaction_id()] = txn;
+    return txn;
 }
 
 /**
@@ -43,6 +49,17 @@ void TransactionManager::commit(Transaction* txn, LogManager* log_manager) {
     // 4. 把事务日志刷入磁盘中
     // 5. 更新事务状态
 
+    std::scoped_lock lock(latch_);
+
+    auto write_set = txn->get_write_set();
+    write_set->clear();
+    auto lock_set = txn->get_lock_set();
+    for (auto lock : *lock_set) {
+        lock_manager_->unlock(txn, lock);
+    }
+    lock_set->clear();
+
+    txn->set_state(TransactionState::COMMITTED);
 }
 
 /**
@@ -57,5 +74,94 @@ void TransactionManager::abort(Transaction * txn, LogManager *log_manager) {
     // 3. 清空事务相关资源，eg.锁集
     // 4. 把事务日志刷入磁盘中
     // 5. 更新事务状态
-    
+
+    std::scoped_lock lock(latch_);
+
+    auto write_set = txn->get_write_set();
+    Context *context = new Context(lock_manager_, log_manager, txn);
+    while (!write_set->empty()) {
+        auto &item = write_set->back();
+        WType type = item->GetWriteType();
+        if (type == WType::INSERT_TUPLE) {
+            auto &tab_name = item->GetTableName();
+            auto &rid = item->GetRid();
+            auto tab = sm_manager_->db_.get_table(tab_name);
+            auto rec = sm_manager_->fhs_.at(tab_name)->get_record(rid, context);
+            // Delete index
+            for (size_t i = 0; i < tab.indexes.size(); ++i) {
+                auto &index = tab.indexes[i];
+                auto ih =
+                    sm_manager_->ihs_.at(sm_manager_->get_ix_manager()->get_index_name(tab_name, index.cols)).get();
+                char *key = new char[index.col_tot_len];
+                int offset = 0;
+                for (int j = 0; j < index.col_num; ++j) {
+                    memcpy(key + offset, rec->data + index.cols[j].offset, index.cols[j].len);
+                    offset += index.cols[j].len;
+                }
+                ih->delete_entry(key, context->txn_);
+            }
+            // Delete record file
+            sm_manager_->fhs_.at(tab_name).get()->delete_record(rid, context);
+        } else if (type == WType::DELETE_TUPLE) {
+            auto &tab_name = item->GetTableName();
+            auto &rec = item->GetRecord();
+            auto tab = sm_manager_->db_.get_table(tab_name);
+            // Insert into record file
+            auto rid = sm_manager_->fhs_.at(tab_name)->insert_record(rec.data, context);
+            // Insert into index
+            for (size_t i = 0; i < tab.indexes.size(); ++i) {
+                auto &index = tab.indexes[i];
+                auto ih =
+                    sm_manager_->ihs_.at(sm_manager_->get_ix_manager()->get_index_name(tab_name, index.cols)).get();
+                char *key = new char[index.col_tot_len];
+                int offset = 0;
+                for (int j = 0; j < index.col_num; ++j) {
+                    memcpy(key + offset, rec.data + index.cols[j].offset, index.cols[j].len);
+                    offset += index.cols[j].len;
+                }
+                ih->insert_entry(key, rid, context->txn_);
+            }
+        } else if (type == WType::UPDATE_TUPLE) {
+            auto &tab_name = item->GetTableName();
+            auto &rid = item->GetRid();
+            auto &record = item->GetRecord();
+            auto tab = sm_manager_->db_.get_table(tab_name);
+            auto rec = sm_manager_->fhs_.at(tab_name)->get_record(rid, context);
+            // Delete index
+            for (size_t i = 0; i < tab.indexes.size(); ++i) {
+                auto &index = tab.indexes[i];
+                auto ih =
+                    sm_manager_->ihs_.at(sm_manager_->get_ix_manager()->get_index_name(tab_name, index.cols)).get();
+                char *key = new char[index.col_tot_len];
+                int offset = 0;
+                for (int j = 0; j < index.col_num; ++j) {
+                    memcpy(key + offset, rec->data + index.cols[j].offset, index.cols[j].len);
+                    offset += index.cols[j].len;
+                }
+                ih->delete_entry(key, context->txn_);
+            }
+            // Insert into index
+            for (size_t i = 0; i < tab.indexes.size(); ++i) {
+                auto &index = tab.indexes[i];
+                auto ih =
+                    sm_manager_->ihs_.at(sm_manager_->get_ix_manager()->get_index_name(tab_name, index.cols)).get();
+                char *key = new char[index.col_tot_len];
+                int offset = 0;
+                for (int j = 0; j < index.col_num; ++j) {
+                    memcpy(key + offset, record.data + index.cols[j].offset, index.cols[j].len);
+                    offset += index.cols[j].len;
+                }
+                ih->insert_entry(key, rid, context->txn_);
+            }
+            sm_manager_->fhs_.at(tab_name)->update_record(rid, record.data, context);
+        }
+        write_set->pop_back();
+    }
+
+    auto lock_set = txn->get_lock_set();
+    for (auto lock : *lock_set) {
+        lock_manager_->unlock(txn, lock);
+    }
+    lock_set->clear();
+    txn->set_state(TransactionState::ABORTED);
 }
