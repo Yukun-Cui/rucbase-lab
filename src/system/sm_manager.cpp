@@ -254,15 +254,13 @@ void SmManager::drop_table(const std::string& tab_name, Context* context) {
  * @param {Context*} context
  */
 void SmManager::create_index(const std::string& tab_name, const std::vector<std::string>& col_names, Context* context) {
-
-    // 表级锁
-    if (context) {
-        context->lock_mgr_->lock_shared_on_table(context->txn_, fhs_[tab_name]->GetFd());
-    }
-
     TabMeta& tab = db_.get_table(tab_name);
     if (ix_manager_->exists(tab_name, col_names)) {
         throw IndexExistsError(tab_name, col_names);
+    }
+    // 表级锁
+    if (context) {
+        context->lock_mgr_->lock_shared_on_table(context->txn_, fhs_[tab_name]->GetFd());
     }
     std::vector<ColMeta> cols;
     for (auto& col_name : col_names) {
@@ -298,15 +296,15 @@ void SmManager::create_index(const std::string& tab_name, const std::vector<std:
  * @param {Context*} context
  */
 void SmManager::drop_index(const std::string& tab_name, const std::vector<std::string>& col_names, Context* context) {
-    
+    if (!ix_manager_->exists(tab_name, col_names)) {
+        throw IndexNotFoundError(tab_name, col_names);
+    }
+
     // 表级锁
     if (context) {
         context->lock_mgr_->lock_shared_on_table(context->txn_, fhs_[tab_name]->GetFd());
     }
-
-    if (!ix_manager_->exists(tab_name, col_names)) {
-        throw IndexNotFoundError(tab_name, col_names);
-    }
+    
     std::string index_name = ix_manager_->get_index_name(tab_name, col_names);
 
     ix_manager_->close_index(ihs_.at(index_name).get());
