@@ -35,7 +35,7 @@ class DeleteExecutor : public AbstractExecutor {
         rids_ = rids;
         context_ = context;
 
-        // 表级锁
+        // 表级意向写锁
         if (context_) {
             context_->lock_mgr_->lock_IX_on_table(context->txn_, fh_->GetFd());
         }

@@ -26,7 +26,7 @@ class SeqScanExecutor : public AbstractExecutor {
     std::vector<Condition> fed_conds_;  // 同conds_，两个字段相同
 
     Rid rid_;
-    std::unique_ptr<RecScan> scan_;     // table_iterator
+    std::unique_ptr<RecScan> scan_;  // table_iterator
 
     SmManager *sm_manager_;
 
@@ -44,7 +44,7 @@ class SeqScanExecutor : public AbstractExecutor {
 
         fed_conds_ = conds_;
 
-        // 表级锁
+        // 表级读锁
         if (context_) {
             context_->lock_mgr_->lock_shared_on_table(context->txn_, fh_->GetFd());
         }
@@ -98,7 +98,6 @@ class SeqScanExecutor : public AbstractExecutor {
     std::unique_ptr<RmRecord> Next() override {
         assert(!is_end());
         return fh_->get_record(rid_, context_);
- 
     }
 
     Rid &rid() override { return rid_; }

@@ -19,15 +19,15 @@ class UpdateExecutor : public AbstractExecutor {
    private:
     TabMeta tab_;
     std::vector<Condition> conds_;
-    RmFileHandle *fh_;
+    RmFileHandle* fh_;
     std::vector<Rid> rids_;
     std::string tab_name_;
     std::vector<SetClause> set_clauses_;
-    SmManager *sm_manager_;
+    SmManager* sm_manager_;
 
    public:
-    UpdateExecutor(SmManager *sm_manager, const std::string &tab_name, std::vector<SetClause> set_clauses,
-                   std::vector<Condition> conds, std::vector<Rid> rids, Context *context) {
+    UpdateExecutor(SmManager* sm_manager, const std::string& tab_name, std::vector<SetClause> set_clauses,
+                   std::vector<Condition> conds, std::vector<Rid> rids, Context* context) {
         sm_manager_ = sm_manager;
         tab_name_ = tab_name;
         set_clauses_ = set_clauses;
@@ -37,7 +37,7 @@ class UpdateExecutor : public AbstractExecutor {
         rids_ = rids;
         context_ = context;
 
-        // 表级锁
+        // 表级意向写锁
         if (context_) {
             context_->lock_mgr_->lock_IX_on_table(context->txn_, fh_->GetFd());
         }
@@ -86,5 +86,5 @@ class UpdateExecutor : public AbstractExecutor {
         return nullptr;
     }
 
-    Rid &rid() override { return _abstract_rid; }
+    Rid& rid() override { return _abstract_rid; }
 };

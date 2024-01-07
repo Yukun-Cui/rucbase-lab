@@ -411,9 +411,11 @@ bool LockManager::unlock(Transaction* txn, LockDataId lock_data_id) {
     } else if (txn->get_state() == TransactionState::SHRINKING) {
         // pass
     }
+    // 未申请
     if (lock_table_.count(lock_data_id) == 0) {
         return true;
     }
+    // 查找当前事务
     LockRequestQueue* lock_request_queue = &lock_table_[lock_data_id];
     auto it = lock_request_queue->request_queue_.begin();
     for (; it != lock_table_[lock_data_id].request_queue_.end(); it++) {
@@ -435,7 +437,6 @@ bool LockManager::unlock(Transaction* txn, LockDataId lock_data_id) {
             break;
     }
     lock_request_queue->request_queue_.erase(it);
-    // 确定queue中级别最大的锁，赋值group_lock_mode_
     int S_num = 0;
     int X_num = 0;
     int IS_num = 0;

@@ -14,15 +14,16 @@ See the Mulan PSL v2 for more details. */
 #include <setjmp.h>
 #include <signal.h>
 #include <unistd.h>
+
 #include <atomic>
 
+#include "analyze/analyze.h"
 #include "errors.h"
 #include "optimizer/optimizer.h"
-#include "recovery/log_recovery.h"
 #include "optimizer/plan.h"
 #include "optimizer/planner.h"
 #include "portal.h"
-#include "analyze/analyze.h"
+#include "recovery/log_recovery.h"
 
 #define SOCK_PORT 8765
 #define MAX_CONN_LIMIT 8
@@ -34,7 +35,8 @@ auto disk_manager = std::make_unique<DiskManager>();
 auto buffer_pool_manager = std::make_unique<BufferPoolManager>(BUFFER_POOL_SIZE, disk_manager.get());
 auto rm_manager = std::make_unique<RmManager>(disk_manager.get(), buffer_pool_manager.get());
 auto ix_manager = std::make_unique<IxManager>(disk_manager.get(), buffer_pool_manager.get());
-auto sm_manager = std::make_unique<SmManager>(disk_manager.get(), buffer_pool_manager.get(), rm_manager.get(), ix_manager.get());
+auto sm_manager =
+    std::make_unique<SmManager>(disk_manager.get(), buffer_pool_manager.get(), rm_manager.get(), ix_manager.get());
 auto lock_manager = std::make_unique<LockManager>();
 auto txn_manager = std::make_unique<TransactionManager>(lock_manager.get(), sm_manager.get());
 auto ql_manager = std::make_unique<QlManager>(sm_manager.get(), txn_manager.get());
@@ -180,8 +182,7 @@ void *client_handler(void *sock_fd) {
             break;
         }
         // 如果是单条语句，需要按照一个完整的事务来执行，所以执行完当前语句后，自动提交事务
-        if(context->txn_->get_txn_mode() == false)
-        {
+        if (context->txn_->get_txn_mode() == false) {
             txn_manager->commit(context->txn_, context->log_mgr_);
         }
     }
@@ -250,13 +251,14 @@ void start_server() {
             std::cout << "Create thread fail!" << std::endl;
             break;  // break while loop
         }
-		
     }
 
     // Clear
     std::cout << " Try to close all client-connection.\n";
     int ret = shutdown(sockfd_server, SHUT_WR);  // shut down the all or part of a full-duplex connection.
-    if(ret == -1) { printf("%s\n", strerror(errno)); }
+    if (ret == -1) {
+        printf("%s\n", strerror(errno));
+    }
     //    assert(ret != -1);
     sm_manager->close_db();
     std::cout << " DB has been closed.\n";
