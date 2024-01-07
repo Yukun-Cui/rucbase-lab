@@ -72,7 +72,6 @@ class IndexScanExecutor : public AbstractExecutor {
     }
 
     void beginTuple() override {
-        // index is available, scan index
         auto ih =
             sm_manager_->ihs_.at(sm_manager_->get_ix_manager()->get_index_name(tab_name_, index_col_names_)).get();
         Iid lower = ih->leaf_begin();
@@ -80,7 +79,6 @@ class IndexScanExecutor : public AbstractExecutor {
         for (auto &index_col : index_col_names_) {
             for (auto &cond : fed_conds_) {
                 if (cond.is_rhs_val && cond.op != OP_NE && cond.lhs_col.col_name == index_col) {
-                    // char *key = cond.rhs_val.raw->data;
                     int offset = 0;
                     char *key = new char[index_meta_.col_tot_len];
                     for (size_t i = 0; i < index_meta_.col_num; ++i) {
@@ -103,14 +101,11 @@ class IndexScanExecutor : public AbstractExecutor {
                     } else {
                         throw InternalError("Unexpected op type");
                     }
-                    break;  // TODO: maintain an interval
+                    break;
                 }
             }
         }
-        // lower = ih->lower_bound(key);
-        // upper = ih->upper_bound(key);
         scan_ = std::make_unique<IxScan>(ih, lower, upper, sm_manager_->get_bpm());
-        // Get the first record
         while (!scan_->is_end()) {
             rid_ = scan_->rid();
             auto rec = fh_->get_record(rid_, context_);
@@ -123,7 +118,6 @@ class IndexScanExecutor : public AbstractExecutor {
 
     void nextTuple() override {
         assert(!is_end());
-        // 扫描到下一个满足条件的记录,赋rid_,中止循环
         for (scan_->next(); !scan_->is_end(); scan_->next()) {
             rid_ = scan_->rid();
             auto rec = fh_->get_record(rid_, context_);
@@ -138,7 +132,6 @@ class IndexScanExecutor : public AbstractExecutor {
     const std::vector<ColMeta> &cols() const override { return cols_; }
 
     std::unique_ptr<RmRecord> Next() override {
-        std::cout << "DEBUG:IndexScanExecutor Next" << std::endl;
         assert(!is_end());
         return fh_->get_record(rid_, context_);
     }
@@ -154,12 +147,11 @@ class IndexScanExecutor : public AbstractExecutor {
             rhs_type = cond.rhs_val.type;
             rhs = cond.rhs_val.raw->data;
         } else {
-            // rhs is a column
             auto rhs_col = get_col(rec_cols, cond.rhs_col);
             rhs_type = rhs_col->type;
             rhs = rec->data + rhs_col->offset;
         }
-        assert(rhs_type == lhs_col->type);  // TODO convert to common type
+        assert(rhs_type == lhs_col->type);
         int cmp = ix_compare(lhs, rhs, rhs_type, lhs_col->len);
         if (cond.op == OP_EQ) {
             return cmp == 0;
