@@ -1,23 +1,5 @@
 # Rucbase使用指南
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [环境配置](#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE)
-- [项目下载](#%E9%A1%B9%E7%9B%AE%E4%B8%8B%E8%BD%BD)
-  - [GoogleTest子模块安装](#googletest%E5%AD%90%E6%A8%A1%E5%9D%97%E5%AE%89%E8%A3%85)
-- [编译](#%E7%BC%96%E8%AF%91)
-- [运行 (S/C)](#%E8%BF%90%E8%A1%8C-sc)
-- [测试单元](#%E6%B5%8B%E8%AF%95%E5%8D%95%E5%85%83)
-- [系统简介](#%E7%B3%BB%E7%BB%9F%E7%AE%80%E4%BB%8B)
-  - [SQL Example](#sql-example)
-- [基本结构](#%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 ## 环境配置
 
 Rucbase需要以下依赖环境库配置：

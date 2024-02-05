@@ -1,17 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [查询执行实验指导](#%E6%9F%A5%E8%AF%A2%E6%89%A7%E8%A1%8C%E5%AE%9E%E9%AA%8C%E6%8C%87%E5%AF%BC)
-  - [任务一指导：DDL](#%E4%BB%BB%E5%8A%A1%E4%B8%80%E6%8C%87%E5%AF%BCddl)
-    - [create_db操作思路](#create_db%E6%93%8D%E4%BD%9C%E6%80%9D%E8%B7%AF)
-    - [close_db操作思路](#close_db%E6%93%8D%E4%BD%9C%E6%80%9D%E8%B7%AF)
-    - [drop_table操作思路](#drop_table%E6%93%8D%E4%BD%9C%E6%80%9D%E8%B7%AF)
-  - [任务三指导：算子接口实现](#%E4%BB%BB%E5%8A%A1%E4%B8%89%E6%8C%87%E5%AF%BC%E7%AE%97%E5%AD%90%E6%8E%A5%E5%8F%A3%E5%AE%9E%E7%8E%B0)
-    - [Insert操作思路](#insert%E6%93%8D%E4%BD%9C%E6%80%9D%E8%B7%AF)
-    - [Delete 操作思路](#delete-%E6%93%8D%E4%BD%9C%E6%80%9D%E8%B7%AF)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # 查询执行实验指导
 
 

@@ -1,19 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [存储管理实验文档](#%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%AE%9E%E9%AA%8C%E6%96%87%E6%A1%A3)
-  - [任务一 缓冲池管理器](#%E4%BB%BB%E5%8A%A1%E4%B8%80-%E7%BC%93%E5%86%B2%E6%B1%A0%E7%AE%A1%E7%90%86%E5%99%A8)
-    - [任务1.1 磁盘存储管理器](#%E4%BB%BB%E5%8A%A111-%E7%A3%81%E7%9B%98%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%99%A8)
-    - [任务1.2 缓冲池替换策略](#%E4%BB%BB%E5%8A%A112-%E7%BC%93%E5%86%B2%E6%B1%A0%E6%9B%BF%E6%8D%A2%E7%AD%96%E7%95%A5)
-    - [任务1.3 缓冲池管理器](#%E4%BB%BB%E5%8A%A113-%E7%BC%93%E5%86%B2%E6%B1%A0%E7%AE%A1%E7%90%86%E5%99%A8)
-  - [任务二 记录管理器](#%E4%BB%BB%E5%8A%A1%E4%BA%8C-%E8%AE%B0%E5%BD%95%E7%AE%A1%E7%90%86%E5%99%A8)
-    - [任务2.1 记录操作](#%E4%BB%BB%E5%8A%A121-%E8%AE%B0%E5%BD%95%E6%93%8D%E4%BD%9C)
-    - [任务2.2 记录迭代器](#%E4%BB%BB%E5%8A%A122-%E8%AE%B0%E5%BD%95%E8%BF%AD%E4%BB%A3%E5%99%A8)
-  - [实验计分](#%E5%AE%9E%E9%AA%8C%E8%AE%A1%E5%88%86)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # 存储管理实验文档
 
 ## 任务一 缓冲池管理器

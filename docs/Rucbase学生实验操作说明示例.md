@@ -1,15 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [实验操作指南](#%E5%AE%9E%E9%AA%8C%E6%93%8D%E4%BD%9C%E6%8C%87%E5%8D%97)
-  - [补全代码](#%E8%A1%A5%E5%85%A8%E4%BB%A3%E7%A0%81)
-  - [自我测试](#%E8%87%AA%E6%88%91%E6%B5%8B%E8%AF%95)
-    - [扩展](#%E6%89%A9%E5%B1%95)
-  - [想运行数据库？](#%E6%83%B3%E8%BF%90%E8%A1%8C%E6%95%B0%E6%8D%AE%E5%BA%93)
-  - [如何提交](#%E5%A6%82%E4%BD%95%E6%8F%90%E4%BA%A4)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # 实验操作指南
 
 > 本文档将以实验一（存储管理实验）部分任务为例示范你应该如何完成一个实验任务，并进行自我测试和提交

@@ -1,16 +1,5 @@
 # Rucbase开发文档
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [flex && bison文件的修改](#flex--bison%E6%96%87%E4%BB%B6%E7%9A%84%E4%BF%AE%E6%94%B9)
-- [代码规范](#%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83)
-- [注释规范](#%E6%B3%A8%E9%87%8A%E8%A7%84%E8%8C%83)
-  - [example](#example)
-- [相关资料](#%E7%9B%B8%E5%85%B3%E8%B5%84%E6%96%99)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 ## flex && bison文件的修改
 在parser子文件夹下涉及flex和bison文件的修改，开发者修改lex.l和yacc.y文件之后，需要通过以下命令重新生成对应文件：
 ```bash

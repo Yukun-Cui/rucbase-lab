@@ -1,24 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [存储系统实验文档（实验二 索引管理器）](#%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C%E6%96%87%E6%A1%A3%E5%AE%9E%E9%AA%8C%E4%BA%8C-%E7%B4%A2%E5%BC%95%E7%AE%A1%E7%90%86%E5%99%A8)
-  - [实验二 索引管理器](#%E5%AE%9E%E9%AA%8C%E4%BA%8C-%E7%B4%A2%E5%BC%95%E7%AE%A1%E7%90%86%E5%99%A8)
-    - [任务1 B+树的查找](#%E4%BB%BB%E5%8A%A11-b%E6%A0%91%E7%9A%84%E6%9F%A5%E6%89%BE)
-      - [（1）结点内的查找](#1%E7%BB%93%E7%82%B9%E5%86%85%E7%9A%84%E6%9F%A5%E6%89%BE)
-      - [（2）B+树的查找](#2b%E6%A0%91%E7%9A%84%E6%9F%A5%E6%89%BE)
-    - [任务2 B+树的插入](#%E4%BB%BB%E5%8A%A12-b%E6%A0%91%E7%9A%84%E6%8F%92%E5%85%A5)
-      - [（1）结点内的插入](#1%E7%BB%93%E7%82%B9%E5%86%85%E7%9A%84%E6%8F%92%E5%85%A5)
-      - [（2）B+树的插入](#2b%E6%A0%91%E7%9A%84%E6%8F%92%E5%85%A5)
-    - [任务3 B+树的删除](#%E4%BB%BB%E5%8A%A13-b%E6%A0%91%E7%9A%84%E5%88%A0%E9%99%A4)
-      - [（1）结点内的删除](#1%E7%BB%93%E7%82%B9%E5%86%85%E7%9A%84%E5%88%A0%E9%99%A4)
-      - [（2）B+树的删除](#2b%E6%A0%91%E7%9A%84%E5%88%A0%E9%99%A4)
-    - [任务4 B+树索引并发控制](#%E4%BB%BB%E5%8A%A14-b%E6%A0%91%E7%B4%A2%E5%BC%95%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6)
-      - [方法一、粗粒度并发（Tree级）](#%E6%96%B9%E6%B3%95%E4%B8%80%E7%B2%97%E7%B2%92%E5%BA%A6%E5%B9%B6%E5%8F%91tree%E7%BA%A7)
-      - [方法二、细粒度并发（Page级）【选做】](#%E6%96%B9%E6%B3%95%E4%BA%8C%E7%BB%86%E7%B2%92%E5%BA%A6%E5%B9%B6%E5%8F%91page%E7%BA%A7%E9%80%89%E5%81%9A)
-    - [实验计分](#%E5%AE%9E%E9%AA%8C%E8%AE%A1%E5%88%86)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 #  存储系统实验文档（实验二 索引管理器）
 
 ## 实验二 索引管理器
