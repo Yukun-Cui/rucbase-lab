@@ -1,36 +1,4 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [查询执行文档](#%E6%9F%A5%E8%AF%A2%E6%89%A7%E8%A1%8C%E6%96%87%E6%A1%A3)
-  - [任务一：元数据管理和DDL实现 (5-7Days)](#%E4%BB%BB%E5%8A%A1%E4%B8%80%E5%85%83%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%92%8Cddl%E5%AE%9E%E7%8E%B0-5-7days)
-    - [元数据管理 (1-2Days)](#%E5%85%83%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86-1-2days)
-    - [DDL语句实现* (2-3Days)](#ddl%E8%AF%AD%E5%8F%A5%E5%AE%9E%E7%8E%B0-2-3days)
-    - [任务完成功能](#%E4%BB%BB%E5%8A%A1%E5%AE%8C%E6%88%90%E5%8A%9F%E8%83%BD)
-  - [任务二：DQL—— select_from语句和相关算子实现(10-15Days)](#%E4%BB%BB%E5%8A%A1%E4%BA%8Cdql-select_from%E8%AF%AD%E5%8F%A5%E5%92%8C%E7%9B%B8%E5%85%B3%E7%AE%97%E5%AD%90%E5%AE%9E%E7%8E%B010-15days)
-    - [算子实现](#%E7%AE%97%E5%AD%90%E5%AE%9E%E7%8E%B0)
-      - [扫描算子(顺序* & 索引) (2-3Days)](#%E6%89%AB%E6%8F%8F%E7%AE%97%E5%AD%90%E9%A1%BA%E5%BA%8F--%E7%B4%A2%E5%BC%95-2-3days)
-      - [连接算子(Nested Loop Join)* (2-3Days)](#%E8%BF%9E%E6%8E%A5%E7%AE%97%E5%AD%90nested-loop-join-2-3days)
-      - [投影算子 (1-2Days)](#%E6%8A%95%E5%BD%B1%E7%AE%97%E5%AD%90-1-2days)
-      - [select_from语句补全 (3Days)](#select_from%E8%AF%AD%E5%8F%A5%E8%A1%A5%E5%85%A8-3days)
-        - [可选任务(5-7Days)](#%E5%8F%AF%E9%80%89%E4%BB%BB%E5%8A%A15-7days)
-    - [任务完成功能](#%E4%BB%BB%E5%8A%A1%E5%AE%8C%E6%88%90%E5%8A%9F%E8%83%BD-1)
-  - [任务三：DML—— INSERT/DELETE/UPDATE语句和算子实现(10-15Days)](#%E4%BB%BB%E5%8A%A1%E4%B8%89dml-insertdeleteupdate%E8%AF%AD%E5%8F%A5%E5%92%8C%E7%AE%97%E5%AD%90%E5%AE%9E%E7%8E%B010-15days)
-    - [Insert 插入操作的实现(5Days)](#insert-%E6%8F%92%E5%85%A5%E6%93%8D%E4%BD%9C%E7%9A%84%E5%AE%9E%E7%8E%B05days)
-      - [插入算子](#%E6%8F%92%E5%85%A5%E7%AE%97%E5%AD%90)
-      - [insert_into()语句补全](#insert_into%E8%AF%AD%E5%8F%A5%E8%A1%A5%E5%85%A8)
-      - [任务完成功能](#%E4%BB%BB%E5%8A%A1%E5%AE%8C%E6%88%90%E5%8A%9F%E8%83%BD-2)
-    - [Delete 删除操作的实现(5Days)](#delete-%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C%E7%9A%84%E5%AE%9E%E7%8E%B05days)
-      - [删除算子](#%E5%88%A0%E9%99%A4%E7%AE%97%E5%AD%90)
-      - [delete_from语句补全](#delete_from%E8%AF%AD%E5%8F%A5%E8%A1%A5%E5%85%A8)
-      - [任务完成功能](#%E4%BB%BB%E5%8A%A1%E5%AE%8C%E6%88%90%E5%8A%9F%E8%83%BD-3)
-    - [Update 更新操作的实现(5Days)](#update-%E6%9B%B4%E6%96%B0%E6%93%8D%E4%BD%9C%E7%9A%84%E5%AE%9E%E7%8E%B05days)
-      - [更新算子](#%E6%9B%B4%E6%96%B0%E7%AE%97%E5%AD%90)
-      - [update_set 语句补全](#update_set-%E8%AF%AD%E5%8F%A5%E8%A1%A5%E5%85%A8)
-      - [任务完成功能](#%E4%BB%BB%E5%8A%A1%E5%AE%8C%E6%88%90%E5%8A%9F%E8%83%BD-4)
-  - [分数说明](#%E5%88%86%E6%95%B0%E8%AF%B4%E6%98%8E)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
+[TOC]
 # 查询执行文档
 
 Rucbase查询执行模块采用的是火山模型(Volcano Model),你可以通过[链接](https://www.computer.org/csdl/journal/tk/1994/01/k0120/13rRUwI5TRe)获取相应论文阅读以理解火山模型的基本概念，并结合项目结构文档理解系统查询模块的整体架构和处理流程。
